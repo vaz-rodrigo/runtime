@@ -207,7 +207,10 @@ namespace Microsoft.Extensions.Configuration
                 return;
             }
 
-            propertyValue = BindInstance(property.PropertyType, propertyValue, config.GetSection(property.Name), options);
+            var configurationSection = config.GetSection(property.Name);
+
+            if (configurationSection.Exists())
+                propertyValue = BindInstance(property.PropertyType, propertyValue, configurationSection, options);
 
             if (propertyValue != null && hasSetter)
             {
@@ -304,23 +307,25 @@ namespace Microsoft.Extensions.Configuration
                 return convertedValue;
             }
 
-            if (config != null && config.GetChildren().Any())
+            // If we don't have an instance, try to create one
+            Type collectionInterface = FindOpenGenericInterface(typeof(IDictionary<,>), type);
+            if (instance == null && section.Exists() && ( (config != null && config.GetChildren().Any()) || (collectionInterface != null) || (type.IsArray) ))
             {
-                // If we don't have an instance, try to create one
-                if (instance == null)
+                // We are already done if binding to a new collection instance worked
+                instance = AttemptBindToCollectionInterfaces(type, config, options);
+                if (instance != null)
                 {
-                    // We are already done if binding to a new collection instance worked
-                    instance = AttemptBindToCollectionInterfaces(type, config, options);
-                    if (instance != null)
-                    {
-                        return instance;
-                    }
-
-                    instance = CreateInstance(type);
+                    return instance;
                 }
 
+                instance = CreateInstance(type);
+            }
+
+            if (config != null && config.GetChildren().Any())
+            {
+
+
                 // See if its a Dictionary
-                Type collectionInterface = FindOpenGenericInterface(typeof(IDictionary<,>), type);
                 if (collectionInterface != null)
                 {
                     BindDictionary(instance, collectionInterface, config, options);

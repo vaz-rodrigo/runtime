@@ -68,6 +68,9 @@ namespace Microsoft.Extensions.Configuration.Json
                         ExitContext();
                         index++;
                     }
+                    if ( index == 0)
+                        AddValue("null");
+
                     break;
 
                 case JsonValueKind.Number:
@@ -75,17 +78,22 @@ namespace Microsoft.Extensions.Configuration.Json
                 case JsonValueKind.True:
                 case JsonValueKind.False:
                 case JsonValueKind.Null:
-                    string key = _currentPath;
-                    if (_data.ContainsKey(key))
-                    {
-                        throw new FormatException(SR.Format(SR.Error_KeyIsDuplicated, key));
-                    }
-                    _data[key] = value.ToString();
+                    AddValue(value.ToString());
                     break;
 
                 default:
                     throw new FormatException(SR.Format(SR.Error_UnsupportedJSONToken, value.ValueKind));
             }
+        }
+
+        private void AddValue(string value)
+        {
+            string key = _currentPath;
+            if (_data.ContainsKey(key))
+            {
+                throw new FormatException(SR.Format(SR.Error_KeyIsDuplicated, key));
+            }
+            _data[key] = value;
         }
 
         private void EnterContext(string context)

@@ -30,6 +30,20 @@ namespace Microsoft.Extensions.Configuration.Json.Test
         }
 
         [Fact]
+        public void EmptyArray()
+        {
+            var json = @"{
+                ""objects"": [
+                ]
+            }";
+
+            var jsonConfigSource = new JsonConfigurationProvider(new JsonConfigurationSource());
+            jsonConfigSource.Load(TestStreamHelpers.StringToStream(json));
+
+            Assert.Equal("[]", jsonConfigSource.Get("objects"));
+        }
+
+        [Fact]
         public void ArrayOfObjects()
         {
             var json = @"{

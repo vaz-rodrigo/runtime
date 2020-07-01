@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using Xunit;
 
@@ -647,6 +648,40 @@ namespace Microsoft.Extensions.Configuration.Binder.Test
         }
 
         [Fact]
+        public void GetEmptyArrayXml()
+        {
+            var config = new ConfigurationBuilder().AddXmlFile("appsettings3.xml").Build();
+
+            var a = config.GetSection("aa:key").Get<string[]>();
+            var b = config.GetSection("cc").Get<string[]>();
+
+            var options = new OptionsWithArrays();
+            config.Bind(options);
+
+            Assert.NotNull(config);
+        }
+
+        [Fact]
+        public void GetEmptyArray()
+        {
+            
+            var config = new ConfigurationBuilder().AddJsonFile("appsettings2.json").Build();
+
+            var a = config.GetSection("ddd").Exists();
+            var b = config.GetSection("StringArray").Exists();
+            var c = config.GetSection("ddd").Get<string[]>();
+            var d = config.GetSection("StringArray").Get<string[]>();
+
+            var options = new OptionsWithArrays();
+            config.Bind(options);
+
+            var array = options.StringArray;
+
+            Assert.NotNull(array);
+            Assert.Equal(0, array.Length);
+        }
+
+        [Fact]
         public void GetStringArray()
         {
             var input = new Dictionary<string, string>
@@ -779,6 +814,10 @@ namespace Microsoft.Extensions.Configuration.Binder.Test
             var configurationBuilder = new ConfigurationBuilder();
             configurationBuilder.AddInMemoryCollection(input);
             var config = configurationBuilder.Build();
+
+            config.GetSection("sadasdasdasdasdas");
+
+
             var options = new OptionsWithArrays();
             config.Bind(options);
 

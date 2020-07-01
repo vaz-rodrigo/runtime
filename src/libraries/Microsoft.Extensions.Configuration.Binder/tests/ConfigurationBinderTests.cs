@@ -240,7 +240,6 @@ namespace Microsoft.Extensions.Configuration.Binder.Test
             var configurationBuilder = new ConfigurationBuilder();
             configurationBuilder.AddInMemoryCollection(dic);
             var config = configurationBuilder.Build();
-
             var options = new ComplexOptions();
             config.Bind(options);
 
@@ -248,6 +247,31 @@ namespace Microsoft.Extensions.Configuration.Binder.Test
         }
 
         [Fact]
+        public void TempTest()
+        {
+            var f = new ConfigurationBuilder()
+.AddJsonFile("appsettings2.json")
+.Build().GetSection("Things");
+            var h = f.Get<string[]>();
+
+
+            var dic = new Dictionary<string, string>
+            {
+                {"Nested:Integer", null},
+                {"Object", null }
+            };
+
+            var configurationBuilder = new ConfigurationBuilder();
+            configurationBuilder.AddInMemoryCollection(dic);
+            var config = configurationBuilder.Build();
+            Assert.Equal(0, config.GetValue<int>("Nested:Integer"));
+            Assert.Null(config.GetValue<ComplexOptions>("Object"));
+            Assert.Equal(0, config.GetSection("Nested:Integer").Get<int>());
+            Assert.Null(config.GetSection("Object").Get<ComplexOptions>());
+
+        }
+
+            [Fact]
         public void GetNullValue()
         {
             var dic = new Dictionary<string, string>
